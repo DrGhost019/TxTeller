@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TxTeller</string>
+    <string name="service_active">شنودگر پیامک‌های بانکی فعال است</string>
+    <string name="service_permission_needed">نیازمند مجوز خواندن پیامک است</string>
+    <string name="grant_permission">اعطای مجوز</string>
+    <string name="sync_now">همگام‌سازی فوری</string>
+    <string name="server_settings">تنظیمات سرور و احراز هویت</string>
+    <string name="server_url">آدرس سرور API (Base URL)</string>
+    <string name="api_key">کلید دسترسی (API Key)</string>
+    <string name="test_connection">تست اتصال به سرور</string>
+    <string name="battery_optimization_title">بهینه‌سازی باتری و فعالیت پس‌زمینه</string>
+    <string name="battery_optimization_desc">جهت جلوگیری از تاخیر در دریافت پیامک‌ها در گوشی‌های سامسونگ و شیائومی، برنامه را در حالت Unrestricted قرار دهید.</string>
+    <string name="disable_battery_optimization">تنظیم محدودیت باتری</string>
+</resources>
