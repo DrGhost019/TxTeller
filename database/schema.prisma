@@ -1,0 +1,87 @@
+// TxTeller Database Schema
+// Optimized for Single-User Personal Accounting with Bank Shahr Auto-Tracking
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Recommended for Supabase connection pooling (port 5432)
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TxType {
+  PURCHASE        // خرید با کارت
+  TRANSFER_OUT    // انتقال وجه به حساب دیگر (برداشت)
+  TRANSFER_IN     // انتقال وجه از دیگران (واریز)
+  ATM_WITHDRAWAL  // برداشت از کارت (خودپرداز)
+  WITHDRAWAL      // سایر برداشت‌ها
+}
+
+enum ParseStatus {
+  PARSED   // با موفقیت پردازش شد
+  FAILED   // خطای تطابق الگو
+  IGNORED  // فیلتر شده یا بدون نیاز به ثبت
+}
+
+model UserConfig {
+  id              String   @id @default(uuid())
+  apiKey          String   @unique // Master key used by Android app
+  telegramChatId  String?  @unique // Owner's Telegram Chat ID
+  masterPassword  String   // Password hash (Argon2/bcrypt) for Web Dashboard
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  name         String        @unique // e.g. Daily Food, Transportation
+  persianName  String        // e.g. خوراک روزانه
+  icon         String        // Emoji icon for Telegram buttons (e.g. 🍔, 🚗)
+  color        String        // Hex color for Web charts (e.g. #10B981)
+  description  String?       // Subcategories & explanation
+  isSystem     Boolean       @default(false)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+}
+
+model RawMessage {
+  id            String        @id @default(uuid())
+  hash          String        @unique // SHA-256 of raw message body (Prevents duplicates)
+  body          String        // Raw SMS text (for auditing & re-parsing)
+  sender        String        // e.g. "Bank Shahr"
+  status        ParseStatus   @default(PARSED)
+  failureReason String?       // Stored if regex parsing fails
+  receivedAt    DateTime      @default(now())
+  transaction   Transaction?
+}
+
+model Transaction {
+  id           String      @id @default(uuid())
+  bankName     String      @default("بانک شهر")
+  txType       TxType
+  title        String      // Bank description (e.g. "خريد با کارت")
+  accountCard  String      // Masked or explicit account number (e.g. "ACCOUNT_NUMBER")
+  amount       BigInt      // In IRR (Rials) to prevent float issues
+  balance      BigInt      // Account balance in IRR after transaction
+  shamsiDate   String      // e.g. "1405/08/23"
+  shamsiTime   String      // e.g. "17:18:05"
+  txTimestamp  DateTime    // Converted to Gregorian UTC for sorting/indexing
+  
+  merchant     String?     // e.g. "اسنپ", "هایپرمی", "کافه راد"
+  note         String?     // توضیحات اختیاری تکمیلی
+
+  categoryId   String?
+  category     Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  rawId        String      @unique
+  rawMessage   RawMessage  @relation(fields: [rawId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([txTimestamp])
+  @@index([txType])
+  @@index([categoryId])
+}
