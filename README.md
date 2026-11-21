@@ -37,38 +37,38 @@ Built specifically for the Iranian banking ecosystem starting with **Bank Shahr 
 ## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────┐
-│     Android Phone (Private)     │
-│                                 │
-│  [ Bank Shahr SMS ]             │
-│          │                      │
-│          ▼                      │
-│  [ Local Whitelist & OTP Filter]──(Non-financial/OTP)──► [Drop]
-│          │                      │
-│          ▼                      │
-│  [ Room DB ] ──► [WorkManager]  │
-└────────────────┬────────────────┘
-                 │ HTTPS POST /api/messages
-                 │ Header: x-api-key: <MASTER_KEY>
-                 ▼
-┌────────────────────────────────────────────────────────┐
-│            Central Next.js API (Vercel)                │
-│                                                        │
-│  1. API Key Authentication                             │
-│  2. SHA-256 Hash Deduplication Check                   │
-│  3. Normalization & Regex Extraction                   │
-│  4. Save RawMessage & Transaction                      │
-│  5. Dispatch Telegram Alert with 8 Inline Categories   │
-└──────────────┬───────────────────────────┬─────────────┘
-               │                           │
-               ▼                           ▼
-┌────────────────────────────┐  ┌─────────────────────────┐
-│   PostgreSQL (Supabase)    │  │  Telegram Bot (Webhook) │
-│                            │  │                         │
-│ - Transactions (BigInt)    │  │ - Instant Push Alerts   │
-│ - 8 Pre-seeded Categories  │  │ - 1-Click Categorization│
-│ - Raw Messages & Hashes    │  │ - Merchant Name Input   │
-└────────────────────────────┘  └─────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                    Android Phone (Private)                         │
+│                                                                    │
+│  [ Bank Shahr SMS ]                                                │
+│          │                                                         │
+│          ▼                                                         │
+│  [ Local Whitelist & OTP Filter ] ──(Non-financial/OTP)──► [Drop]  │
+│          │                                                         │
+│          ▼                                                         │
+│  [ Room DB ] ──► [ WorkManager ]                                   │
+└─────────────────────────────────┬──────────────────────────────────┘
+                                  │ HTTPS POST /api/messages
+                                  │ Header: x-api-key: <MASTER_KEY>
+                                  ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                    Central Next.js API (Vercel)                    │
+│                                                                    │
+│  1. API Key Authentication                                         │
+│  2. SHA-256 Hash Deduplication Check                               │
+│  3. Normalization & Regex Extraction                               │
+│  4. Save RawMessage & Transaction                                  │
+│  5. Dispatch Telegram Alert with 8 Inline Categories               │
+└──────────────────┬──────────────────────────────┬──────────────────┘
+                   │                              │
+                   ▼                              ▼
+┌──────────────────────────────────┐  ┌──────────────────────────────┐
+│      PostgreSQL (Supabase)       │  │    Telegram Bot (Webhook)    │
+│                                  │  │                              │
+│ - Transactions (BigInt)          │  │ - Instant Push Alerts        │
+│ - 8 Pre-seeded Categories        │  │ - 1-Click Categorization     │
+│ - Raw Messages & Hashes          │  │ - Merchant Name Input        │
+└──────────────────────────────────┘  └──────────────────────────────┘
 ```
 
 ---
